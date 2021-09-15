@@ -1,22 +1,25 @@
 Shader "Unlit/Gradients"{
     Properties{
-        _colorA("Color A", Color) = (1, 1, 1, 1)
-        _colorB("Color B", Color) = (1, 1, 1, 1)
+        _ColorA("Color A", Color) = (1, 1, 1, 1)
+        _ColorB("Color B", Color) = (1, 1, 1, 1)
+        _ColorStart("Color Start", Range(0,1)) = 0
+        _ColorEnd("Color End", Range(0,1)) = 1
     }
     SubShader{
-        Tags{
-            "RenderType"="Opaque"
-        }
+        Tags{ "RenderType"="Opaque" }
+        
         Pass{
+            
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
            
             #include "UnityCG.cginc"
 
-            float4 _colorA;
-            float4 _colorB;
-
+            float4 _ColorA;
+            float4 _ColorB;
+            float _ColorStart;    
+            float _ColorEnd;
 
             //automatically filled out by Unity
             struct MeshData{ // per-vertex mesh data
@@ -40,11 +43,19 @@ Shader "Unlit/Gradients"{
                 o.uv = v.uv0; // pass through
                 return o;
             }
+
+
+            float InverseLerp( float a, float b, float v ){
+                return  (v-a)/(b-a);
+            }
+
             
             fixed4 frag (Interpolators i) : SV_Target{
 
                 // blend between two colors based on the X UV coordinate
-                float4 outColor = lerp(_colorA, _colorB, i.uv.x);
+                float t = saturate( InverseLerp( _ColorStart, _ColorEnd, i.uv.x) );
+                
+                float4 outColor = lerp(_ColorA, _ColorB, t);
                 
                 return outColor; // red
             }
