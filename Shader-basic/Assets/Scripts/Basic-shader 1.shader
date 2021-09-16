@@ -22,10 +22,10 @@ Shader "Unlit/Basic-shader"{
 
             //automatically filled out by Unity
             struct MeshData{ // per-vertex mesh data
-                float4 vertex : POSITION; // vertex position
-                float3 normals : NORMAL;
-                //float3 tangent : TANGENT;
-                //float4 color : COLOR;
+                float4 vertex : POSITION; // local space vertex position
+                float3 normals : NORMAL; // local space normal direction
+                //float3 tangent : TANGENT; // tangent direction (xyz) tangent sign (w)
+                //float4 color : COLOR; // vertex colors 
                 float4 uv0 : TEXCOORD0; // uv0 diffuse/normal map textures
                 //float4 uv1 : TEXCOORD1; // uv1 coordinates lightmap coordinate
             };
