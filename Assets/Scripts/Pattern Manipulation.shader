@@ -1,4 +1,4 @@
-Shader "Unlit/Triangle Wave"{
+Shader "Unlit/Pattern Manipulation"{
     Properties{
         _ColorA("Color A", Color) = (1, 1, 1, 1)
         _ColorB("Color B", Color) = (1, 1, 1, 1)
@@ -57,12 +57,14 @@ Shader "Unlit/Triangle Wave"{
                 // blend between two colors based on the X UV coordinate
                 // float t = saturate( InverseLerp( _ColorStart, _ColorEnd, i.uv.x) );
                 // float t = abs( frac(i.uv.x * 5) * 2 -1 ); // First way to triangle wave
-                float t = cos(i.uv.x * TAU * 5) * 0.5 + 0.5;
+
+                float offset = i.uv.y;
+                
+                float t = cos( (i.uv.x + offset) * TAU * 5) * 0.5 + 0.5;
                 return t;
                 
-                float4 outColor = lerp(_ColorA, _ColorB, t);
-                
-                return outColor; 
+                // float4 outColor = lerp(_ColorA, _ColorB, t);
+                // return outColor; 
             }
             ENDCG
         }
