@@ -1,27 +1,20 @@
-Shader "Unlit/Depth Buffer"{
+Shader "Unlit/Vertex offset"{
     Properties{
         _ColorA("Color A", Color) = (1, 1, 1, 1)
         _ColorB("Color B", Color) = (1, 1, 1, 1)
         _ColorStart("Color Start", Range(0,1)) = 0
         _ColorEnd("Color End", Range(0,1)) = 1
+        _WaveAmp ("Wave Amplitude", Range(0,0.2)) = 0.1
+        
     }
     SubShader{
         Tags{ 
-            "RenderType"="Transparent" // tag to inform the render pipeline of what type this is
-            "Queue"="Transparent" // changes the render order
-            }
+            "RenderType"="Opaque" // tag to inform the render pipeline of what type this is
+        }
         
         Pass{
             // Pass tags
-            
-            Cull Off
-            ZWrite Off
-            ZTest LEqual  // ZTest GEqual, ZTest Always
-            Blend One One  //additive
-            
-            
-            // Blend DstColor Zero  // Multiply
-            
+
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -34,6 +27,7 @@ Shader "Unlit/Depth Buffer"{
             float4 _ColorB;
             float _ColorStart;    
             float _ColorEnd;
+            float _WaveAmp;
 
             //automatically filled out by Unity
             struct MeshData{ // per-vertex mesh data
@@ -52,6 +46,11 @@ Shader "Unlit/Depth Buffer"{
 
             Interpolators vert (MeshData v) {
                 Interpolators o;
+
+                float waves = cos( (v.uv0.y - _Time.y * 0.1f ) * TAU * 5);
+
+                v.vertex.y = waves * _WaveAmp;
+                
                 o.vertex = UnityObjectToClipPos(v.vertex); // local space to clip space
                 o.normal = UnityObjectToWorldNormal(v.normals); // just pass through
                 o.uv = v.uv0; // pass through
@@ -70,18 +69,10 @@ Shader "Unlit/Depth Buffer"{
                 // float t = saturate( InverseLerp( _ColorStart, _ColorEnd, i.uv.x) );
                 // float t = abs( frac(i.uv.x * 5) * 2 -1 ); // First way to triangle wave
 
-                // return i.uv.y;
+                // return float4(i.uv,0,1);
                 
-                float offset = cos( i.uv.x * TAU * 5) * 0.01;
-                
-                float t = cos( (i.uv.y + offset - _Time.y * 0.1f ) * TAU * 5) * 0.5 + 0.5;
-                t *= 1-i.uv.y;
-
-                float topBottomRemover = (abs(i.normal.y) < 0.999);
-                float waves = t * topBottomRemover;
-                
-                float4 gradient = lerp(_ColorA, _ColorB, i.uv.y);
-                return gradient * waves; 
+                float waves = cos( (i.uv.y - _Time.y * 0.1f ) * TAU * 5) * 0.5 + 0.5;
+                return waves;
             }
             ENDCG
         }
